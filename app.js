@@ -58,7 +58,7 @@ function render() {
   const balance = ingresos - gastos;
 
   elBalance.textContent = fmt(balance);
-  elBalance.style.color = balance < 0 ? '#ff6b6b' : 'white';
+  elBalance.className = 'balance-amount ' + (balance < 0 ? 'negativo' : 'positivo');
   elIngresos.textContent = fmt(ingresos);
   elGastos.textContent = fmt(gastos);
 
@@ -71,15 +71,23 @@ function renderLista() {
     : transacciones.filter(t => t.tipo === filtroActual);
 
   if (filtradas.length === 0) {
-    elLista.innerHTML = '<p class="empty-msg">No hay transacciones aún.</p>';
+    elLista.innerHTML = '<p class="empty-msg"><span>🪙</span>No hay transacciones aún.<br>Agregá tu primer movimiento.</p>';
     return;
   }
 
+  const iconos = {
+    ingreso: '💰',
+    gasto: '💸',
+  };
+
   elLista.innerHTML = filtradas.map(t => `
     <li class="transaccion ${t.tipo}">
-      <div class="transaccion-info">
-        <span class="transaccion-desc">${escHtml(t.desc)}</span>
-        <span class="transaccion-fecha">${formatFecha(t.fecha)}</span>
+      <div class="transaccion-izquierda">
+        <div class="transaccion-emoji">${iconos[t.tipo]}</div>
+        <div class="transaccion-info">
+          <span class="transaccion-desc">${escHtml(t.desc)}</span>
+          <span class="transaccion-fecha">${formatFecha(t.fecha)}</span>
+        </div>
       </div>
       <div class="transaccion-derecha">
         <span class="transaccion-monto">${t.tipo === 'gasto' ? '-' : '+'}${fmt(t.monto)}</span>

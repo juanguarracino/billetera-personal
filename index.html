@@ -6,6 +6,8 @@
   <title>Billetera Personal</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
   <!-- PANTALLA DE BLOQUEO -->
@@ -47,6 +49,7 @@
         <div class="logo-icon">💳</div>
         <h1>Billetera Personal</h1>
         <div class="header-mes" id="header-mes"></div>
+        <div class="sync-badge" id="sync-badge" title="Sincronizando...">⟳</div>
       </header>
 
       <div class="balance-card">

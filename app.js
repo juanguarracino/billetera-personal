@@ -179,11 +179,51 @@ document.addEventListener('keydown', e => {
 });
 // ────────────────────────────────────────────────────────────────────────────
 
-const STORAGE_KEY     = 'billetera_transacciones';
-const STORAGE_KEY_USD = 'billetera_ahorro_usd';
+// ── Firebase ─────────────────────────────────────────────────────────────────
+firebase.initializeApp({
+  apiKey:            "AIzaSyBjcOaztfG893I9lkHXsAnskM10ktPa1jQ",
+  authDomain:        "billetera-personal-8af80.firebaseapp.com",
+  projectId:         "billetera-personal-8af80",
+  storageBucket:     "billetera-personal-8af80.firebasestorage.app",
+  messagingSenderId: "344737606582",
+  appId:             "1:344737606582:web:1807e85335b54671cc6f17"
+});
 
-let transacciones = JSON.parse(localStorage.getItem(STORAGE_KEY))     || [];
-let comprasUSD    = JSON.parse(localStorage.getItem(STORAGE_KEY_USD)) || [];
+const db     = firebase.firestore();
+const docRef = db.collection('billetera').doc('datos');
+const syncBadge = document.getElementById('sync-badge');
+
+function setSyncing() {
+  syncBadge.textContent = '⟳';
+  syncBadge.className = 'sync-badge syncing';
+}
+
+function setSynced() {
+  syncBadge.textContent = '✓';
+  syncBadge.className = 'sync-badge ok';
+  setTimeout(() => { syncBadge.className = 'sync-badge'; }, 2000);
+}
+
+function guardar() {
+  setSyncing();
+  docRef.set({ transacciones, comprasUSD })
+    .then(setSynced)
+    .catch(console.error);
+}
+
+// Escuchar cambios en tiempo real (sincroniza entre dispositivos)
+docRef.onSnapshot(snap => {
+  const data = snap.exists ? snap.data() : {};
+  transacciones = data.transacciones || [];
+  comprasUSD    = data.comprasUSD    || [];
+  render();
+  if (document.getElementById('view-ahorro').classList.contains('active'))    renderAhorro();
+  if (document.getElementById('view-historial').classList.contains('active')) renderHistorial();
+});
+// ─────────────────────────────────────────────────────────────────────────────
+
+let transacciones = [];
+let comprasUSD    = [];
 let filtroActual  = 'todos';
 let graficoUSD    = null;
 
@@ -252,7 +292,7 @@ function agregarTransaccion() {
   }
 
   transacciones.unshift({ id: Date.now(), desc, monto, tipo, fecha });
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(transacciones));
+  guardar();
   render();
 
   document.getElementById('descripcion').value = '';
@@ -262,7 +302,7 @@ function agregarTransaccion() {
 
 function eliminarTransaccion(id) {
   transacciones = transacciones.filter(t => t.id !== id);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(transacciones));
+  guardar();
   render();
 }
 
@@ -280,7 +320,7 @@ function agregarCompraUSD() {
   }
 
   comprasUSD.unshift({ id: Date.now(), cantidad, cotizacion, fecha });
-  localStorage.setItem(STORAGE_KEY_USD, JSON.stringify(comprasUSD));
+  guardar();
   renderAhorro();
 
   document.getElementById('usd-cantidad').value   = '';
@@ -290,7 +330,7 @@ function agregarCompraUSD() {
 
 function eliminarCompraUSD(id) {
   comprasUSD = comprasUSD.filter(c => c.id !== id);
-  localStorage.setItem(STORAGE_KEY_USD, JSON.stringify(comprasUSD));
+  guardar();
   renderAhorro();
 }
 

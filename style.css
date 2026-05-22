@@ -258,6 +258,29 @@ header h1 {
   text-transform: capitalize;
 }
 
+.sync-badge {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.sync-badge.syncing {
+  opacity: 1;
+  animation: spin 1s linear infinite;
+}
+
+.sync-badge.ok {
+  opacity: 1;
+  animation: none;
+  color: var(--green);
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
 /* ── Balance card ── */
 .balance-card {
   background: linear-gradient(145deg, #1a0a2e, #120a24, #0e1228);

@@ -1,3 +1,117 @@
+// ── PIN / Lock ──────────────────────────────────────────────────────────────
+const PIN_KEY = 'billetera_pin_hash';
+
+let pinBuffer  = '';
+let pinMode    = localStorage.getItem(PIN_KEY) ? 'enter' : 'setup';
+let pinSetup1  = '';   // primer ingreso al crear PIN
+
+const lockScreen  = document.getElementById('lock-screen');
+const lockSubtitle = document.getElementById('lock-subtitle');
+const pinError    = document.getElementById('pin-error');
+const pinDots     = document.getElementById('pin-dots');
+
+async function hashPIN(pin) {
+  const data   = new TextEncoder().encode('billetera_v1_' + pin);
+  const buf    = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function updateDots() {
+  document.querySelectorAll('.dot').forEach((dot, i) => {
+    dot.classList.toggle('filled', i < pinBuffer.length);
+  });
+}
+
+function setLockSubtitle(text) { lockSubtitle.textContent = text; }
+function setLockError(text)    { pinError.textContent = text; }
+
+function shakeDots() {
+  pinDots.classList.remove('shake');
+  void pinDots.offsetWidth;
+  pinDots.classList.add('shake');
+  setTimeout(() => pinDots.classList.remove('shake'), 420);
+}
+
+async function handlePinComplete() {
+  const pin = pinBuffer;
+  pinBuffer  = '';
+  updateDots();
+
+  if (pinMode === 'setup') {
+    if (!pinSetup1) {
+      pinSetup1 = pin;
+      setLockSubtitle('Repetí el PIN para confirmar');
+      setLockError('');
+    } else {
+      if (pin === pinSetup1) {
+        localStorage.setItem(PIN_KEY, await hashPIN(pin));
+        unlockApp();
+      } else {
+        pinSetup1 = '';
+        setLockSubtitle('Creá tu PIN de 4 dígitos');
+        setLockError('Los PINs no coinciden, intentá de nuevo');
+        shakeDots();
+      }
+    }
+  } else {
+    const stored = localStorage.getItem(PIN_KEY);
+    const attempt = await hashPIN(pin);
+    if (attempt === stored) {
+      unlockApp();
+    } else {
+      setLockError('PIN incorrecto');
+      shakeDots();
+    }
+  }
+}
+
+function unlockApp() {
+  sessionStorage.setItem('unlocked', '1');
+  lockScreen.classList.add('fade-out');
+  setTimeout(() => lockScreen.classList.add('hidden'), 350);
+}
+
+// Inicializar lock screen
+if (sessionStorage.getItem('unlocked')) {
+  lockScreen.classList.add('hidden');
+} else {
+  setLockSubtitle(pinMode === 'setup' ? 'Creá tu PIN de 4 dígitos' : 'Ingresá tu PIN');
+}
+
+// Teclado numérico
+document.querySelectorAll('.pin-key[data-n]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (pinBuffer.length >= 4) return;
+    setLockError('');
+    pinBuffer += btn.dataset.n;
+    updateDots();
+    if (pinBuffer.length === 4) handlePinComplete();
+  });
+});
+
+document.getElementById('pin-del').addEventListener('click', () => {
+  pinBuffer = pinBuffer.slice(0, -1);
+  setLockError('');
+  updateDots();
+});
+
+// Soporte teclado físico en el lock screen
+document.addEventListener('keydown', e => {
+  if (lockScreen.classList.contains('hidden')) return;
+  if (/^[0-9]$/.test(e.key) && pinBuffer.length < 4) {
+    setLockError('');
+    pinBuffer += e.key;
+    updateDots();
+    if (pinBuffer.length === 4) handlePinComplete();
+  }
+  if (e.key === 'Backspace') {
+    pinBuffer = pinBuffer.slice(0, -1);
+    setLockError('');
+    updateDots();
+  }
+});
+// ────────────────────────────────────────────────────────────────────────────
+
 const STORAGE_KEY     = 'billetera_transacciones';
 const STORAGE_KEY_USD = 'billetera_ahorro_usd';
 

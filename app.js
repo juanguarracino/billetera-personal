@@ -1,14 +1,14 @@
 // ── PIN / Lock ──────────────────────────────────────────────────────────────
-const PIN_KEY = 'billetera_pin_hash';
-
 let pinBuffer  = '';
-let pinMode    = localStorage.getItem(PIN_KEY) ? 'enter' : 'setup';
-let pinSetup1  = '';   // primer ingreso al crear PIN
+let pinMode    = 'setup';
+let pinSetup1  = '';
 
-const lockScreen  = document.getElementById('lock-screen');
+const lockScreen   = document.getElementById('lock-screen');
 const lockSubtitle = document.getElementById('lock-subtitle');
-const pinError    = document.getElementById('pin-error');
-const pinDots     = document.getElementById('pin-dots');
+const lockLoading  = document.getElementById('lock-loading');
+const pinError     = document.getElementById('pin-error');
+const pinDots      = document.getElementById('pin-dots');
+const pinPad       = document.getElementById('pin-pad');
 
 async function hashPIN(pin) {
   const data   = new TextEncoder().encode('billetera_v1_' + pin);
@@ -39,16 +39,22 @@ function getFailCount() { return parseInt(localStorage.getItem(FAIL_KEY) || '0')
 function incFailCount() { localStorage.setItem(FAIL_KEY, getFailCount() + 1); }
 function resetFailCount() { localStorage.removeItem(FAIL_KEY); }
 
+// pinHash se carga desde Firestore al iniciar
+let pinHashActual = null;
+
 function wipeAll() {
   localStorage.clear();
   sessionStorage.clear();
+  // Borrar datos y PIN de Firestore
+  configRef.delete().catch(() => {});
+  docRef.delete().catch(() => {});
 }
 
 function showWipedScreen() {
   lockSubtitle.textContent = '';
   pinError.textContent = '';
   pinDots.style.display = 'none';
-  document.getElementById('pin-pad').style.display = 'none';
+  pinPad.style.display  = 'none';
 
   const msg = document.createElement('div');
   msg.className = 'wipe-msg';
@@ -59,6 +65,12 @@ function showWipedScreen() {
     <button class="wipe-btn" onclick="location.reload()">Configurar nuevo PIN</button>
   `;
   document.querySelector('.lock-container').appendChild(msg);
+}
+
+function mostrarPinUI() {
+  lockLoading.style.display = 'none';
+  pinDots.style.display     = 'flex';
+  pinPad.style.display      = 'grid';
 }
 
 async function handlePinComplete() {
@@ -73,7 +85,10 @@ async function handlePinComplete() {
       setLockError('');
     } else {
       if (pin === pinSetup1) {
-        localStorage.setItem(PIN_KEY, await hashPIN(pin));
+        const hash = await hashPIN(pin);
+        // Guardar PIN en Firestore (compartido entre dispositivos)
+        await configRef.set({ pinHash: hash });
+        pinHashActual = hash;
         resetFailCount();
         unlockApp();
       } else {
@@ -84,9 +99,8 @@ async function handlePinComplete() {
       }
     }
   } else {
-    const stored  = localStorage.getItem(PIN_KEY);
     const attempt = await hashPIN(pin);
-    if (attempt === stored) {
+    if (attempt === pinHashActual) {
       resetFailCount();
       unlockApp();
     } else {
@@ -137,12 +151,26 @@ function startInactivityTimer() {
   resetInactivityTimer();
 }
 
-// Inicializar lock screen
+// Inicializar lock screen — leer PIN desde Firestore
 if (sessionStorage.getItem('unlocked')) {
   lockScreen.classList.add('hidden');
+  // Cargar PIN en background por si cambió en otro dispositivo
+  configRef.get().then(snap => {
+    pinHashActual = snap.exists ? (snap.data().pinHash || null) : null;
+  });
   startInactivityTimer();
 } else {
-  setLockSubtitle(pinMode === 'setup' ? 'Creá tu PIN de 4 dígitos' : 'Ingresá tu PIN');
+  // Mostrar spinner mientras carga el PIN desde Firestore
+  configRef.get().then(snap => {
+    pinHashActual = snap.exists ? (snap.data().pinHash || null) : null;
+    pinMode = pinHashActual ? 'enter' : 'setup';
+    setLockSubtitle(pinMode === 'setup' ? 'Creá tu PIN de 4 dígitos' : 'Ingresá tu PIN');
+    mostrarPinUI();
+  }).catch(() => {
+    // Sin conexión: intentar con caché local
+    setLockSubtitle('Sin conexión');
+    setLockError('Necesitás internet para ingresar.');
+  });
 }
 
 // Teclado numérico
@@ -189,8 +217,9 @@ firebase.initializeApp({
   appId:             "1:344737606582:web:1807e85335b54671cc6f17"
 });
 
-const db     = firebase.firestore();
-const docRef = db.collection('billetera').doc('datos');
+const db        = firebase.firestore();
+const docRef    = db.collection('billetera').doc('datos');
+const configRef = db.collection('billetera').doc('config');
 const syncBadge = document.getElementById('sync-badge');
 
 function setSyncing() {

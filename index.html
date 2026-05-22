@@ -15,9 +15,11 @@
     <div class="lock-container">
       <div class="lock-logo">💳</div>
       <h1 class="lock-title">Billetera Personal</h1>
-      <p class="lock-subtitle" id="lock-subtitle">Ingresá tu PIN</p>
+      <p class="lock-subtitle" id="lock-subtitle">Cargando...</p>
 
-      <div class="pin-dots" id="pin-dots">
+      <div class="lock-loading" id="lock-loading">⟳</div>
+
+      <div class="pin-dots" id="pin-dots" style="display:none">
         <span class="dot" id="dot-0"></span>
         <span class="dot" id="dot-1"></span>
         <span class="dot" id="dot-2"></span>
@@ -26,7 +28,7 @@
 
       <p class="pin-error" id="pin-error"></p>
 
-      <div class="pin-pad" id="pin-pad">
+      <div class="pin-pad" id="pin-pad" style="display:none">
         <button class="pin-key" data-n="1">1</button>
         <button class="pin-key" data-n="2">2</button>
         <button class="pin-key" data-n="3">3</button>

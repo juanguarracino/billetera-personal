@@ -80,6 +80,13 @@ html, body { height: 100%; }
 .lock-subtitle {
   font-size: 0.85rem;
   color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+.lock-loading {
+  font-size: 2rem;
+  color: var(--text-muted);
+  animation: spin 1s linear infinite;
   margin-bottom: 36px;
 }
 

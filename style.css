@@ -169,6 +169,43 @@ html, body { height: 100%; }
   background: var(--surface2);
 }
 
+.wipe-msg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+  animation: slideIn 0.3s ease;
+}
+
+.wipe-icon { font-size: 3rem; }
+
+.wipe-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--red);
+}
+
+.wipe-text {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.wipe-btn {
+  margin-top: 8px;
+  padding: 13px 28px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
   font-family: 'Inter', sans-serif;
   background: var(--bg);

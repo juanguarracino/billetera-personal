@@ -32,6 +32,35 @@ function shakeDots() {
   setTimeout(() => pinDots.classList.remove('shake'), 420);
 }
 
+const FAIL_KEY    = 'billetera_fail_count';
+const MAX_INTENTOS = 5;
+
+function getFailCount() { return parseInt(localStorage.getItem(FAIL_KEY) || '0'); }
+function incFailCount() { localStorage.setItem(FAIL_KEY, getFailCount() + 1); }
+function resetFailCount() { localStorage.removeItem(FAIL_KEY); }
+
+function wipeAll() {
+  localStorage.clear();
+  sessionStorage.clear();
+}
+
+function showWipedScreen() {
+  lockSubtitle.textContent = '';
+  pinError.textContent = '';
+  pinDots.style.display = 'none';
+  document.getElementById('pin-pad').style.display = 'none';
+
+  const msg = document.createElement('div');
+  msg.className = 'wipe-msg';
+  msg.innerHTML = `
+    <div class="wipe-icon">⚠️</div>
+    <p class="wipe-title">Acceso bloqueado</p>
+    <p class="wipe-text">Se superaron ${MAX_INTENTOS} intentos fallidos.<br>Todos los datos fueron eliminados por seguridad.</p>
+    <button class="wipe-btn" onclick="location.reload()">Configurar nuevo PIN</button>
+  `;
+  document.querySelector('.lock-container').appendChild(msg);
+}
+
 async function handlePinComplete() {
   const pin = pinBuffer;
   pinBuffer  = '';
@@ -45,6 +74,7 @@ async function handlePinComplete() {
     } else {
       if (pin === pinSetup1) {
         localStorage.setItem(PIN_KEY, await hashPIN(pin));
+        resetFailCount();
         unlockApp();
       } else {
         pinSetup1 = '';
@@ -54,13 +84,21 @@ async function handlePinComplete() {
       }
     }
   } else {
-    const stored = localStorage.getItem(PIN_KEY);
+    const stored  = localStorage.getItem(PIN_KEY);
     const attempt = await hashPIN(pin);
     if (attempt === stored) {
+      resetFailCount();
       unlockApp();
     } else {
-      setLockError('PIN incorrecto');
-      shakeDots();
+      incFailCount();
+      const restantes = MAX_INTENTOS - getFailCount();
+      if (restantes <= 0) {
+        wipeAll();
+        showWipedScreen();
+      } else {
+        setLockError(`PIN incorrecto. Intentos restantes: ${restantes}`);
+        shakeDots();
+      }
     }
   }
 }

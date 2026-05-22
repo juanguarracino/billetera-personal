@@ -2,66 +2,95 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>Billetera Personal</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <header>
-      <div class="logo-icon">💳</div>
-      <h1>Billetera Personal</h1>
-    </header>
+  <!-- VISTA: MES ACTUAL -->
+  <div id="view-main" class="view active">
+    <div class="container">
+      <header>
+        <div class="logo-icon">💳</div>
+        <h1>Billetera Personal</h1>
+        <div class="header-mes" id="header-mes"></div>
+      </header>
 
-    <div class="balance-card">
-      <p class="balance-label">Balance actual</p>
-      <p class="balance-amount" id="balance">$0.00</p>
-    </div>
+      <div class="balance-card">
+        <p class="balance-label">Balance del mes</p>
+        <p class="balance-amount" id="balance">$0.00</p>
+      </div>
 
-    <div class="resumen">
-      <div class="resumen-item ingreso">
-        <div class="resumen-icon">📈</div>
-        <div class="resumen-data">
-          <span>Ingresos</span>
-          <strong id="total-ingresos">$0.00</strong>
+      <div class="resumen">
+        <div class="resumen-item ingreso">
+          <div class="resumen-icon">📈</div>
+          <div class="resumen-data">
+            <span>Ingresos</span>
+            <strong id="total-ingresos">$0.00</strong>
+          </div>
+        </div>
+        <div class="resumen-item gasto">
+          <div class="resumen-icon">📉</div>
+          <div class="resumen-data">
+            <span>Gastos</span>
+            <strong id="total-gastos">$0.00</strong>
+          </div>
         </div>
       </div>
-      <div class="resumen-item gasto">
-        <div class="resumen-icon">📉</div>
-        <div class="resumen-data">
-          <span>Gastos</span>
-          <strong id="total-gastos">$0.00</strong>
+
+      <div class="form-card">
+        <h2>Nueva transacción</h2>
+        <div class="form-group">
+          <input type="text" id="descripcion" placeholder="Descripción (ej: almuerzo, sueldo...)" />
         </div>
+        <div class="form-group form-row">
+          <input type="number" id="monto" placeholder="Monto" step="0.01" min="0" inputmode="decimal" />
+          <select id="tipo">
+            <option value="gasto">💸 Gasto</option>
+            <option value="ingreso">💰 Ingreso</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <input type="date" id="fecha" />
+        </div>
+        <button id="btn-agregar">+ Agregar</button>
       </div>
-    </div>
 
-    <div class="form-card">
-      <h2>Nueva transacción</h2>
-      <div class="form-group">
-        <input type="text" id="descripcion" placeholder="Descripción (ej: almuerzo, sueldo...)" />
+      <div class="filtros">
+        <button class="filtro activo" data-filtro="todos">Todos</button>
+        <button class="filtro" data-filtro="ingreso">Ingresos</button>
+        <button class="filtro" data-filtro="gasto">Gastos</button>
       </div>
-      <div class="form-group form-row">
-        <input type="number" id="monto" placeholder="Monto" step="0.01" min="0" />
-        <select id="tipo">
-          <option value="gasto">💸 Gasto</option>
-          <option value="ingreso">💰 Ingreso</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <input type="date" id="fecha" />
-      </div>
-      <button id="btn-agregar">+ Agregar transacción</button>
-    </div>
 
-    <div class="filtros">
-      <button class="filtro activo" data-filtro="todos">Todos</button>
-      <button class="filtro" data-filtro="ingreso">Ingresos</button>
-      <button class="filtro" data-filtro="gasto">Gastos</button>
+      <p class="lista-header">Este mes</p>
+      <ul id="lista-transacciones"></ul>
+      <div class="bottom-spacer"></div>
     </div>
-
-    <p class="lista-header">Historial</p>
-    <ul id="lista-transacciones"></ul>
   </div>
+
+  <!-- VISTA: HISTORIAL -->
+  <div id="view-historial" class="view">
+    <div class="container">
+      <header>
+        <div class="logo-icon">📅</div>
+        <h1>Historial</h1>
+      </header>
+      <div id="historial-contenido"></div>
+      <div class="bottom-spacer"></div>
+    </div>
+  </div>
+
+  <!-- NAVEGACIÓN INFERIOR -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-view="main">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Inicio</span>
+    </button>
+    <button class="nav-btn" data-view="historial">
+      <span class="nav-icon">📅</span>
+      <span class="nav-label">Historial</span>
+    </button>
+  </nav>
 
   <script src="app.js"></script>
 </body>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Billetera Personal</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>💰 Billetera Personal</h1>
+
+    <div class="balance-card">
+      <p class="balance-label">Balance actual</p>
+      <p class="balance-amount" id="balance">$0.00</p>
+    </div>
+
+    <div class="form-card">
+      <h2>Agregar gasto / ingreso</h2>
+      <div class="form-group">
+        <input type="text" id="descripcion" placeholder="Descripción (ej: almuerzo, taxi...)" />
+      </div>
+      <div class="form-group form-row">
+        <input type="number" id="monto" placeholder="Monto" step="0.01" />
+        <select id="tipo">
+          <option value="gasto">Gasto</option>
+          <option value="ingreso">Ingreso</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <input type="date" id="fecha" />
+      </div>
+      <button id="btn-agregar">Agregar</button>
+    </div>
+
+    <div class="resumen">
+      <div class="resumen-item ingreso">
+        <span>Total ingresos</span>
+        <strong id="total-ingresos">$0.00</strong>
+      </div>
+      <div class="resumen-item gasto">
+        <span>Total gastos</span>
+        <strong id="total-gastos">$0.00</strong>
+      </div>
+    </div>
+
+    <div class="filtros">
+      <button class="filtro activo" data-filtro="todos">Todos</button>
+      <button class="filtro" data-filtro="ingreso">Ingresos</button>
+      <button class="filtro" data-filtro="gasto">Gastos</button>
+    </div>
+
+    <ul id="lista-transacciones"></ul>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

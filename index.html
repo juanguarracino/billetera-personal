@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>Billetera Personal</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
   <!-- VISTA: MES ACTUAL -->
@@ -68,6 +69,69 @@
     </div>
   </div>
 
+  <!-- VISTA: AHORRO USD -->
+  <div id="view-ahorro" class="view">
+    <div class="container">
+      <header>
+        <div class="logo-icon">💵</div>
+        <h1>Ahorro en USD</h1>
+      </header>
+
+      <div class="balance-card balance-usd">
+        <p class="balance-label">Total ahorrado</p>
+        <p class="balance-amount" id="total-usd">U$S 0.00</p>
+        <p class="balance-sub" id="total-ars-invertido"></p>
+      </div>
+
+      <div class="resumen">
+        <div class="resumen-item ingreso">
+          <div class="resumen-icon">🔄</div>
+          <div class="resumen-data">
+            <span>Cotiz. prom.</span>
+            <strong id="cotiz-promedio">—</strong>
+          </div>
+        </div>
+        <div class="resumen-item gasto">
+          <div class="resumen-icon">📦</div>
+          <div class="resumen-data">
+            <span>Compras</span>
+            <strong id="cant-compras">0</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <p class="chart-title">Evolución del ahorro</p>
+        <div class="chart-wrap">
+          <canvas id="grafico-usd"></canvas>
+        </div>
+        <p class="chart-empty" id="chart-empty">Agregá compras para ver el gráfico</p>
+      </div>
+
+      <div class="form-card">
+        <h2>Registrar compra de USD</h2>
+        <div class="form-group form-row">
+          <div class="input-with-label">
+            <span class="input-prefix">U$S</span>
+            <input type="number" id="usd-cantidad" placeholder="Cantidad" step="0.01" min="0" inputmode="decimal" />
+          </div>
+          <div class="input-with-label">
+            <span class="input-prefix">$</span>
+            <input type="number" id="usd-cotizacion" placeholder="Cotización" step="1" min="0" inputmode="decimal" />
+          </div>
+        </div>
+        <div class="form-group">
+          <input type="date" id="usd-fecha" />
+        </div>
+        <button id="btn-comprar-usd">+ Registrar compra</button>
+      </div>
+
+      <p class="lista-header">Historial de compras</p>
+      <ul id="lista-usd"></ul>
+      <div class="bottom-spacer"></div>
+    </div>
+  </div>
+
   <!-- VISTA: HISTORIAL -->
   <div id="view-historial" class="view">
     <div class="container">
@@ -85,6 +149,10 @@
     <button class="nav-btn active" data-view="main">
       <span class="nav-icon">🏠</span>
       <span class="nav-label">Inicio</span>
+    </button>
+    <button class="nav-btn" data-view="ahorro">
+      <span class="nav-icon">💵</span>
+      <span class="nav-label">Ahorro</span>
     </button>
     <button class="nav-btn" data-view="historial">
       <span class="nav-icon">📅</span>

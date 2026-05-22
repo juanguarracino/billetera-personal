@@ -107,11 +107,40 @@ function unlockApp() {
   sessionStorage.setItem('unlocked', '1');
   lockScreen.classList.add('fade-out');
   setTimeout(() => lockScreen.classList.add('hidden'), 350);
+  startInactivityTimer();
+}
+
+function lockApp() {
+  if (!localStorage.getItem(PIN_KEY)) return;
+  sessionStorage.removeItem('unlocked');
+  pinBuffer = '';
+  pinSetup1 = '';
+  pinMode   = 'enter';
+  updateDots();
+  setLockSubtitle('Ingresá tu PIN');
+  setLockError('');
+  lockScreen.classList.remove('hidden', 'fade-out');
+}
+
+// ── Inactividad: bloqueo a los 5 minutos ──
+const INACTIVITY_MS = 5 * 60 * 1000;
+let inactivityTimer = null;
+
+function resetInactivityTimer() {
+  clearTimeout(inactivityTimer);
+  inactivityTimer = setTimeout(lockApp, INACTIVITY_MS);
+}
+
+function startInactivityTimer() {
+  const eventos = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click'];
+  eventos.forEach(ev => document.addEventListener(ev, resetInactivityTimer, { passive: true }));
+  resetInactivityTimer();
 }
 
 // Inicializar lock screen
 if (sessionStorage.getItem('unlocked')) {
   lockScreen.classList.add('hidden');
+  startInactivityTimer();
 } else {
   setLockSubtitle(pinMode === 'setup' ? 'Creá tu PIN de 4 dígitos' : 'Ingresá tu PIN');
 }
